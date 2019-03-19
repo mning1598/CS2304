@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/mning1598/CS2304#readme",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "js-yaml": "^3.12.2",
+    "mongoose": "^5.4.19"
   }
 }
