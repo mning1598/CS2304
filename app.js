@@ -27,4 +27,6 @@ app.post('/blabs', async function (req, res) {
 
     fs.writeFile(users, JSON.stringify(toAdd), "utf8", null);
 
+    res.status(201, { message: 'Blab added successfully!' });
+
 })
