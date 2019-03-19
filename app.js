@@ -1,18 +1,9 @@
 const express = require('express')
-var mongoose = require('mongoose')
+var fs = require('fs')
+var users = require('data/users.json')
 const app = express()
 const port = 3000
-
-mongoose.Promise = global.Promise;mongoose.connect("mongodb://localhost:27017/cs2304project");
-
-var dataSchema = new mongoose.Schema({
-    id: String,
-    posttime: Date.now(),
-    author: { email: String, name: String },
-    message: String
-   });
-
-var User = mongoose.model("User", dataSchema)
+var userID = 0;
 
 app.get('/', (req, res) => res.send('Hello World!'))
 
@@ -27,5 +18,13 @@ app.delete('/blabs/:id', async function (req, res) {
 })
 
 app.post('/blabs', async function (req, res) {
+
+    var toAdd = {
+        id: userID,
+        author: { email: req.body.author.email, name: req.body.author.name },
+        message: req.body.message
+    }
+
+    fs.writeFile(users, JSON.stringify(toAdd), "utf8", null);
 
 })
