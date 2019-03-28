@@ -9,7 +9,7 @@ const port = 3000;
 app.use(bodyParser.json());
 var userID = 0;
 
-mongoose.connect("mongodb://localhost/test");
+mongoose.connect("mongodb://mongo:27017");
 
 var db = mongoose.connection;
 db.on("error", console.error.bind(console, "[DB Connection] Failed"));
