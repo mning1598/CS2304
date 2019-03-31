@@ -1,14 +1,14 @@
 version: '3'
 
 services:
-  #reverse-proxy:
-   # image: traefik # The official Traefik docker image
-    #command: --api --docker # Enables the web UI and tells Traefik to listen to docker
-    #ports:
-     # - "80:80"     # The HTTP port
-     # - "8080:8080" # The Web UI (enabled by --api)
-    #volumes:
-     # - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+  reverse-proxy:
+    image: traefik # The official Traefik docker image
+    command: --api --docker # Enables the web UI and tells Traefik to listen to docker
+    ports:
+      - "80:80"     # The HTTP port
+      - "8080:8080" # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
   mongo:
     image: mongo:latest
     ports:
@@ -23,5 +23,14 @@ services:
       - 3000:3000
     depends_on:
       - mongo
-    #labels:
-    #  - "traefik.frontend.rule=Host:api.docker.localhost"
+    labels:
+      - traefik.frontend.rule.PathStrip=/api/
+      - traefik.port=3000
+  tests:
+    image: vtcs2304s19/blabber-client
+    environment:
+      SERVICE_NAME: api
+      API_PORT: api
+    labels:
+      - traefik.frontend.rule
+      - traefik.port=80
