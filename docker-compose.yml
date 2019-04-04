@@ -13,8 +13,10 @@ services:
     image: mongo:latest
     ports:
       - 27017:27017
-    #labels:
-    #  - "traefik.frontend.rule=Host:mongo.docker.localhost"
+    volumes:
+      - /data/db:/data/db
+    labels:
+      - "traefik.frontend.rule=Host:mongo.docker.localhost"
   api:
     build: .
     volumes:
@@ -24,13 +26,14 @@ services:
     depends_on:
       - mongo
     labels:
-      - traefik.frontend.rule.PathStrip=/api/
+      - traefik.frontend.rule.PathPrefixStrip=/api/
+      #- traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /traefik
       - traefik.port=3000
   tests:
     image: vtcs2304s19/blabber-client
     environment:
       SERVICE_NAME: api
       API_PORT: api
-    labels:
-      - traefik.frontend.rule
-      - traefik.port=80
+    #labels:
+     # - traefik.frontend.rule
+      #- traefik.port=80
