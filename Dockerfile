@@ -3,5 +3,5 @@ LABEL authors="kpuri@vt.edu, mning@vt.edu"
 WORKDIR /app
 COPY . .
 RUN npm install
-CMD node app.js
+CMD nodemon app.js
 

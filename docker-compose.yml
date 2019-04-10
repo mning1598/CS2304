@@ -4,36 +4,43 @@ services:
   reverse-proxy:
     image: traefik # The official Traefik docker image
     command: --api --docker # Enables the web UI and tells Traefik to listen to docker
-    ports:
-      - "80:80"     # The HTTP port
+    ports:    
+      - "80:80" # The HTTP port
       - "8080:8080" # The Web UI (enabled by --api)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    labels:
+      - "traefik.port=8080"
   mongo:
     image: mongo:latest
     ports:
       - 27017:27017
     volumes:
       - /data/db:/data/db
-    labels:
-      - "traefik.frontend.rule=Host:mongo.docker.localhost"
-  api:
+  app:
+    image: node:alpine
     build: .
     volumes:
       - .:/app
-    ports:
-      - 3000:3000
     depends_on:
       - mongo
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
     labels:
-      - traefik.frontend.rule.PathPrefixStrip=/api/
-      #- traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /traefik
-      - traefik.port=3000
-  tests:
+      #- "traefik.backend=api"
+      - "traefik.frontend.rule=PathPrefixStrip:/api"
+      #- "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /traefik"
+      - "traefik.port=3000"
+  client:
     image: vtcs2304s19/blabber-client
     environment:
-      SERVICE_NAME: api
-      API_PORT: api
-    #labels:
-     # - traefik.frontend.rule
-      #- traefik.port=80
+      SERVICE_NAME: app
+      API_PORT: 3000
+      SLEEP_TIMER: 15
+    labels:
+      #- "traefik.backend=client"
+      #- "traefik.frontend.rule=Host:domain.local"
+      - "traefik.port=80"
+      #- "traefik.enable=true"
