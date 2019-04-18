@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    image: traefik # The official Traefik docker image
+    command: --api --docker --docker.swarmmode # Enables the web UI and tells Traefik to listen to docker
+    ports:    
+      - "80:80" # The HTTP port
+      - "8080:8080" # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    labels:
+      - "traefik.port=8080"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-db:/data/db
+  app:
+    image: node:alpine
+    build: .
+    volumes:
+      - .:/app
+    depends_on:
+      - mongo
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    deploy:
+      replicas: 2
+      labels:
+        - "traefik.backend=api.localhost"
+        - "traefik.frontend.rule=PathPrefixStrip:/api"
+        - "traefik.port=3000"
+  client:
+    image: vtcs2304s19/blabber-client
+    deploy:
+      replicas: 2
+      labels:
+        - "traefik.backend=client"
+        - "traefik.frontend.rule=Host:localhost"
+        - "traefik.port=80"
+volumes:
+  mongo-db:
