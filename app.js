@@ -2,6 +2,7 @@ const express = require("express");
 var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var User = require('./user_model.js');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -9,7 +10,9 @@ const port = 3000;
 app.use(bodyParser.json());
 var userID = 0;
 
-mongoose.connect("mongodb://mongo:27017");
+var mongooseUrl = fs.readFileSync('/run/secrets/' + process.env.DB_PASSWORD_FILE, 'utf8').trim()
+
+mongoose.connect(mongooseUrl);
 
 var db = mongoose.connection;
 db.on("error", console.error.bind(console, "[DB Connection] Failed"));
@@ -20,6 +23,23 @@ db.once("open", function() {
 app.get("/", (req, res) => res.send("CS 2304 Project API"));
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+app.get("/health", async function(req, res) {
+
+  var state = mongoose.connection.readyState;
+  
+  if (state == 1) {
+
+    res.status(200).send("OK");
+
+  }
+  else {
+
+    res.status(200).send("NOT-OK");
+
+  }
+
+});
 
 app.get("/blabs", async function(req, res) {
 

@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 
 services:
   reverse-proxy:
@@ -26,6 +26,7 @@ services:
       - mongo
     environment:
       NODE_ENV: development
+      DB_PASSWORD_FILE: mongodburl
     ports:
       - "3000:3000"
     labels:
@@ -33,12 +34,17 @@ services:
       - "traefik.frontend.rule=PathPrefixStrip:/api"
       #- "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /traefik"
       - "traefik.port=3000"
+    read_only: true
+    secrets:
+      - mongodburl
   client:
     image: vtcs2304s19/blabber-client
     labels:
       - "traefik.backend=client"
       - "traefik.frontend.rule=Host:localhost"
       - "traefik.port=80"
-
 volumes:
   mongo-db:
+secrets:
+  mongodburl:
+    file: mongourl.txt
