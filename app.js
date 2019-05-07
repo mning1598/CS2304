@@ -3,8 +3,25 @@ var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var User = require('./user_model.js');
 const fs = require('fs');
+const promClient = require("prom-client");
+const promBundle = require("express-prom-bundle");
+//const metricsMiddleware = promBundle({includeMethod: true});
 
 const app = express();
+
+const bundle = promBundle({
+  includeMethod: true,
+  promClient: {
+    collectDefaultMetrics: {
+      timeout: 1000
+    }
+  }
+});
+
+app.use(bundle);
+
+const blabCount = new promClient.Counter({name: 'blabCount', help: 'c1 help'});
+
 const port = 3000;
 
 app.use(bodyParser.json());
@@ -99,6 +116,7 @@ app.post("/blabs", function(req, res) {
   console.log('\n');
 
   userID = userID + 1;
+  blabCount.inc(1);
   toAdd.save(function(err) {
     if (err) return console.log(err);
     else {

@@ -37,6 +37,18 @@ services:
     read_only: true
     secrets:
       - mongodburl
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    labels:
+      - "traefik.backend=prometheus.localhost"
+      - "traefik.port=9090"
+    read_only: true
+    secrets:
+      - mongodburl
   client:
     image: vtcs2304s19/blabber-client
     labels:
